@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { Resvg } from '@cf-wasm/resvg';
 
 export const prerender = false;
 
@@ -127,7 +128,6 @@ export const GET: APIRoute = async ({ request }) => {
 
   // Render SVG to PNG
   try {
-    const { Resvg } = await import('@cf-wasm/resvg');
     const resvg = new Resvg(svg, {
       fitTo: { mode: 'width' as const, value: 1200 },
     });
@@ -139,8 +139,9 @@ export const GET: APIRoute = async ({ request }) => {
         'cache-control': 'public, max-age=3600',
       },
     });
-  } catch (err) {
+  } catch (err: unknown) {
     // Fallback: return SVG if PNG rendering fails
+    console.error('resvg PNG render failed:', err);
     return new Response(svg, {
       headers: {
         'content-type': 'image/svg+xml',
