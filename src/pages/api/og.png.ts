@@ -1,53 +1,43 @@
 import type { APIRoute } from 'astro';
 import { Resvg } from '@cf-wasm/resvg';
 
-type Env = { ASSETS?: { fetch: (req: Request) => Promise<Response> } };
+let fontCache: { mono: Uint8Array | null; monoRegular: Uint8Array | null; sans: Uint8Array | null } = {
+  mono: null, monoRegular: null, sans: null
+};
 
-type FontData = { buffers: ArrayBuffer[]; base64Defs: string };
-let fontCache: FontData | null = null;
+async function loadFonts(origin: string, assets?: { fetch: (input: string | Request) => Promise<Response> }) {
+  if (fontCache.mono && fontCache.monoRegular && fontCache.sans) return;
 
-function toBase64(buf: ArrayBuffer): string {
-  const bytes = new Uint8Array(buf);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
-  return btoa(binary);
-}
+  const paths = {
+    mono: '/fonts/IBMPlexMono-Bold.ttf',
+    monoRegular: '/fonts/IBMPlexMono-Regular.ttf',
+    sans: '/fonts/IBMPlexSans-Regular.ttf',
+  };
 
-async function loadFonts(env?: Env): Promise<FontData> {
-  if (fontCache) return fontCache;
+  const doFetch = (path: string) =>
+    assets
+      ? assets.fetch(new URL(path, origin).toString())
+      : fetch(`${origin}${path}`);
 
-  const fontFiles: Array<{ path: string; family: string; weight: string }> = [
-    { path: '/fonts/IBMPlexMono-Bold.ttf', family: 'IBM Plex Mono', weight: 'bold' },
-    { path: '/fonts/IBMPlexMono-Regular.ttf', family: 'IBM Plex Mono', weight: 'normal' },
-    { path: '/fonts/IBMPlexSans-Regular.ttf', family: 'IBM Plex Sans', weight: 'normal' },
-  ];
+  const [monoRes, monoRegRes, sansRes] = await Promise.all([
+    doFetch(paths.mono),
+    doFetch(paths.monoRegular),
+    doFetch(paths.sans),
+  ]);
 
-  const buffers: ArrayBuffer[] = [];
-  const fontFaces: string[] = [];
+  if (!monoRes.ok) throw new Error(`Font fetch failed: ${paths.mono} ${monoRes.status}`);
+  if (!monoRegRes.ok) throw new Error(`Font fetch failed: ${paths.monoRegular} ${monoRegRes.status}`);
+  if (!sansRes.ok) throw new Error(`Font fetch failed: ${paths.sans} ${sansRes.status}`);
 
-  const fetcher = env?.ASSETS;
-  if (!fetcher) {
-    console.warn('OG: No ASSETS binding');
-    return { buffers: [], base64Defs: '' };
-  }
+  const [monoBuf, monoRegBuf, sansBuf] = await Promise.all([
+    monoRes.arrayBuffer(),
+    monoRegRes.arrayBuffer(),
+    sansRes.arrayBuffer(),
+  ]);
 
-  for (const f of fontFiles) {
-    try {
-      const res = await fetcher.fetch(new Request(`http://fakehost${f.path}`));
-      if (res.ok) {
-        const buf = await res.arrayBuffer();
-        buffers.push(buf);
-        const b64 = toBase64(buf);
-        fontFaces.push(
-          `@font-face { font-family: '${f.family}'; font-weight: ${f.weight}; src: url('data:font/ttf;base64,${b64}') format('truetype'); }`
-        );
-      }
-    } catch { /* ignore */ }
-  }
-
-  const base64Defs = fontFaces.length ? `<style>${fontFaces.join(' ')}</style>` : '';
-  fontCache = { buffers, base64Defs };
-  return fontCache;
+  fontCache.mono = new Uint8Array(monoBuf);
+  fontCache.monoRegular = new Uint8Array(monoRegBuf);
+  fontCache.sans = new Uint8Array(sansBuf);
 }
 
 export const prerender = false;
@@ -179,16 +169,17 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
   // Render SVG to PNG
   try {
-    const runtimeEnv = ((locals as Record<string, unknown>)?.runtime as Record<string, unknown> | undefined)?.env as Env | undefined;
-    const fontData = await loadFonts(runtimeEnv);
-    // Inject base64 font-face defs into the SVG so resvg can resolve them
-    const svgWithFonts = svg.replace('<defs>', `<defs>${fontData.base64Defs}`);
-    const resvg = new Resvg(svgWithFonts, {
-      fitTo: { mode: 'width' as const, value: 1200 },
+    const runtime = (locals as Record<string, unknown>)?.runtime as Record<string, unknown> | undefined;
+    const env = runtime?.env as Record<string, unknown> | undefined;
+    const origin = new URL(request.url).origin;
+    await loadFonts(origin, env?.ASSETS as { fetch: (input: string | Request) => Promise<Response> } | undefined);
+
+    const resvg = new Resvg(svg, {
       font: {
-        fontBuffers: fontData.buffers.map(b => new Uint8Array(b)),
+        fontBuffers: [fontCache.mono!, fontCache.monoRegular!, fontCache.sans!],
         defaultFontFamily: 'IBM Plex Mono',
       },
+      fitTo: { mode: 'width' as const, value: 1200 },
     });
     const png = resvg.render().asPng();
 
