@@ -23,13 +23,13 @@
   "kv_namespaces": [
     {
       "binding": "RATE_LIMIT",
-      "id": "<YOUR_RATE_LIMIT_KV_ID>",
-      "preview_id": "<YOUR_RATE_LIMIT_KV_PREVIEW_ID>"
+      "id": "989f92635ef9417b877c0704f246b3ae",
+      "preview_id": "989f92635ef9417b877c0704f246b3ae"
     },
     {
       "binding": "RESULTS",
-      "id": "<YOUR_RESULTS_KV_ID>",
-      "preview_id": "<YOUR_RESULTS_KV_PREVIEW_ID>"
+      "id": "9e4e321bafe747feb5b9f4d4a4f6a981",
+      "preview_id": "9e4e321bafe747feb5b9f4d4a4f6a981"
     }
   ]
 }
