@@ -1,6 +1,26 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RepoAuditApp from '../components/RepoAuditApp';
+import { kvGetJson } from '../lib/kvJson';
+
+export const prerender = false;
+
+type GalleryItem = {
+  id: string;
+  url: string;
+  full_name: string;
+  total: number;
+  grade: string;
+  sharedAt: string;
+  modelUsed: string | null;
+};
+
+const env = (Astro.locals as any)?.runtime?.env as { RESULTS?: KVNamespace } | undefined;
+const resultsKv = env?.RESULTS;
+const gallery =
+  resultsKv
+    ? ((await kvGetJson<{ items?: GalleryItem[] }>(resultsKv, 'gallery:latest'))?.items ?? []).slice(0, 6)
+    : [];
 ---
 
 <BaseLayout title="Repo Audit">
@@ -24,7 +44,7 @@ import RepoAuditApp from '../components/RepoAuditApp';
         </a>
       </div>
 
-      <RepoAuditApp client:load />
+      <RepoAuditApp client:load initialGallery={gallery} />
 
       <div class="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
         <div class="font-mono text-[11px] text-dim">

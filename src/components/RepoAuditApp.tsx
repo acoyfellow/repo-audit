@@ -43,11 +43,14 @@ const RECOMMENDED_MODELS: Array<{ id: string; label: string; note: string }> = [
 
 type Screen = 'input' | 'loading' | 'reveal' | 'results';
 
+type GalleryItem = { id: string; url: string; full_name: string; total: number; grade: string };
+
 function InputCard(props: {
   onSubmit: (repo: string, opts: { ai: boolean; model: string; ghToken?: string }) => void;
   error: string;
   loading: boolean;
   defaultRepo?: string;
+  initialGallery?: GalleryItem[];
 }) {
   const { onSubmit, error, loading } = props;
   const [repo, setRepo] = useState(props.defaultRepo ?? '');
@@ -57,9 +60,7 @@ function InputCard(props: {
   const [model, setModel] = useState(RECOMMENDED_MODELS[0]!.id);
   const [customModel, setCustomModel] = useState('');
   const [ghToken, setGhToken] = useState('');
-  const [gallery, setGallery] = useState<Array<{ id: string; url: string; full_name: string; total: number; grade: string }>>(
-    [],
-  );
+  const [gallery, setGallery] = useState<GalleryItem[]>(props.initialGallery ?? []);
 
   const ref = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
@@ -68,6 +69,7 @@ function InputCard(props: {
   }, []);
 
   useEffect(() => {
+    if (gallery.length) return;
     let dead = false;
     (async () => {
       try {
@@ -363,7 +365,7 @@ function RevealCard({
   );
 }
 
-export default function RepoAuditApp() {
+export default function RepoAuditApp(props: { initialGallery?: GalleryItem[] }) {
   const [screen, setScreen] = useState<Screen>('input');
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState('');
@@ -471,7 +473,7 @@ export default function RepoAuditApp() {
   }, []);
 
   if (screen === 'input') {
-    return <InputCard onSubmit={(r, o) => audit(r, o)} error={error} loading={loading} />;
+    return <InputCard onSubmit={(r, o) => audit(r, o)} error={error} loading={loading} initialGallery={props.initialGallery} />;
   }
 
   if (screen === 'loading') {
