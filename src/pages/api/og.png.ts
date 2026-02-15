@@ -6,7 +6,7 @@ let fontCache: ArrayBuffer[] | null = null;
 async function loadFonts(env?: { ASSETS?: { fetch: (req: Request | string) => Promise<Response> } }, requestUrl?: string): Promise<ArrayBuffer[]> {
   if (fontCache) return fontCache;
 
-  const fontPaths = ['/fonts/IBMPlexMono-Bold.ttf', '/fonts/IBMPlexSans-Regular.ttf'];
+  const fontPaths = ['/fonts/IBMPlexMono-Bold.ttf', '/fonts/IBMPlexMono-Regular.ttf', '/fonts/IBMPlexSans-Regular.ttf'];
   const buffers: ArrayBuffer[] = [];
 
   for (const path of fontPaths) {
@@ -87,12 +87,12 @@ function buildSvg(params: {
   </defs>
   <rect width="${W}" height="${H}" fill="url(#bg)"/>
   <rect x="0" y="${H - 4}" width="${W}" height="4" fill="url(#accent)"/>
-  <text x="80" y="200" fill="#4a4a55" font-family="monospace" font-size="14" letter-spacing="4">OPEN-SOURCE SCORING</text>
-  <text x="80" y="290" fill="#e4e4ea" font-family="Georgia, serif" font-size="72">Repository</text>
-  <text x="530" y="290" fill="#00d4aa" font-family="Georgia, serif" font-size="72" font-style="italic" font-weight="bold">Audit</text>
-  <text x="80" y="350" fill="#7a7a88" font-family="sans-serif" font-size="22">Deterministic scoring plus an optional Workers AI qualitative pass.</text>
-  <text x="80" y="385" fill="#7a7a88" font-family="sans-serif" font-size="22">Designed for fast, opinionated repo triage.</text>
-  <text x="80" y="${H - 50}" fill="#4a4a55" font-family="monospace" font-size="16">repo-audit.coey.dev</text>
+  <text x="80" y="200" fill="#4a4a55" font-family="IBM Plex Mono" font-size="14" letter-spacing="4">OPEN-SOURCE SCORING</text>
+  <text x="80" y="290" fill="#e4e4ea" font-family="IBM Plex Mono" font-size="72">Repository</text>
+  <text x="530" y="290" fill="#00d4aa" font-family="IBM Plex Mono" font-size="72" font-style="italic" font-weight="bold">Audit</text>
+  <text x="80" y="350" fill="#7a7a88" font-family="IBM Plex Sans" font-size="22">Deterministic scoring plus an optional Workers AI qualitative pass.</text>
+  <text x="80" y="385" fill="#7a7a88" font-family="IBM Plex Sans" font-size="22">Designed for fast, opinionated repo triage.</text>
+  <text x="80" y="${H - 50}" fill="#4a4a55" font-family="IBM Plex Mono" font-size="16">repo-audit.coey.dev</text>
 </svg>`;
   }
 
@@ -116,20 +116,20 @@ function buildSvg(params: {
   <circle cx="${W - 160}" cy="200" r="100" fill="none" stroke="${g.color}" stroke-width="6"
     stroke-dasharray="${(s / 10) * 628} 628" stroke-linecap="round"
     transform="rotate(-90 ${W - 160} 200)"/>
-  <text x="${W - 160}" y="185" fill="${g.color}" font-family="Georgia, serif" font-size="80"
+  <text x="${W - 160}" y="185" fill="${g.color}" font-family="IBM Plex Mono" font-size="80"
     text-anchor="middle" dominant-baseline="central" font-weight="bold">${escapeXml(g.letter)}</text>
-  <text x="${W - 160}" y="250" fill="#7a7a88" font-family="monospace" font-size="22"
+  <text x="${W - 160}" y="250" fill="#7a7a88" font-family="IBM Plex Mono" font-size="22"
     text-anchor="middle">${s.toFixed(1)} / 10</text>
 
   <!-- Labels -->
-  <text x="80" y="80" fill="#4a4a55" font-family="monospace" font-size="14" letter-spacing="4">REPO AUDIT</text>
-  <text x="80" y="180" fill="#e4e4ea" font-family="monospace" font-size="48" font-weight="bold">${escapeXml(repo)}</text>
-  <text x="80" y="240" fill="${g.color}" font-family="sans-serif" font-size="24">${escapeXml(g.label)}</text>
+  <text x="80" y="80" fill="#4a4a55" font-family="IBM Plex Mono" font-size="14" letter-spacing="4">REPO AUDIT</text>
+  <text x="80" y="180" fill="#e4e4ea" font-family="IBM Plex Mono" font-size="48" font-weight="bold">${escapeXml(repo)}</text>
+  <text x="80" y="240" fill="${g.color}" font-family="IBM Plex Sans" font-size="24">${escapeXml(g.label)}</text>
   ${descLines.slice(0, 2).map((line, i) =>
-    `<text x="80" y="${300 + i * 32}" fill="#7a7a88" font-family="sans-serif" font-size="20">${escapeXml(line)}</text>`
+    `<text x="80" y="${300 + i * 32}" fill="#7a7a88" font-family="IBM Plex Sans" font-size="20">${escapeXml(line)}</text>`
   ).join('\n  ')}
 
-  <text x="80" y="${H - 50}" fill="#4a4a55" font-family="monospace" font-size="16">repo-audit.coey.dev</text>
+  <text x="80" y="${H - 50}" fill="#4a4a55" font-family="IBM Plex Mono" font-size="16">repo-audit.coey.dev</text>
 </svg>`;
 }
 
