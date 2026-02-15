@@ -25,7 +25,10 @@ This tutorial walks you through auditing a public GitHub repository end-to-end.
   - recommendations
   - optional red flags
 
+## 3.5 Shareable link (default)
+
+After each audit, the app creates a shareable URL and redirects you to it. Shared results are retained for 30 days.
+
 ## 4. Try another repo
 
 Use **Audit Another** to reset and run a new audit.
-

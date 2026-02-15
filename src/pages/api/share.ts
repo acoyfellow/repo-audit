@@ -1,10 +1,22 @@
 import type { APIRoute } from 'astro';
 import { rateLimitFixedWindow } from '../../lib/rateLimit';
-import { kvPutJson } from '../../lib/kvJson';
+import { kvGetJson, kvPutJson } from '../../lib/kvJson';
 import { randomId } from '../../lib/id';
 import type { AuditResult } from '../../lib/auditTypes';
+import { computeTotal } from '../../lib/categories';
+import { getGrade } from '../../lib/grades';
 
 export const prerender = false;
+
+type GalleryItem = {
+  id: string;
+  url: string;
+  full_name: string;
+  total: number;
+  grade: string;
+  sharedAt: string;
+  modelUsed: string | null;
+};
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object' && !Array.isArray(v);
@@ -41,7 +53,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const rl = await rateLimitFixedWindow({
       kv: rateKv,
       key: `${ip}:/api/share`,
-      limit: 10,
+      // Share is called by the UI by default after an audit; keep it in the same ballpark
+      // as `/api/audit` so we don't rate-limit legitimate usage.
+      limit: 30,
       windowSeconds: 60,
     });
     if (!rl.ok) {
@@ -93,12 +107,44 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const id = randomId(10);
   const key = `share:${id}`;
-  const stored = { ...result, sharedAt: new Date().toISOString() };
+  const sharedAt = new Date().toISOString();
+  const stored = { ...result, sharedAt };
   await kvPutJson(resultsKv, key, stored, { expirationTtl: 60 * 60 * 24 * 30 }); // 30 days
 
   const shareUrl = `${new URL(request.url).origin}/r/${id}`;
+
+  // Best-effort gallery index.
+  try {
+    const galleryKey = 'gallery:latest';
+    const existing = (await kvGetJson<{ items?: GalleryItem[] }>(resultsKv, galleryKey))?.items ?? [];
+    const total = Number(computeTotal((result as any).scores ?? {}));
+    const grade = getGrade(total);
+    const item: GalleryItem = {
+      id,
+      url: shareUrl,
+      full_name: String((result as any).meta?.full_name || ''),
+      total: Number.isFinite(total) ? total : 0,
+      grade: grade.letter,
+      sharedAt,
+      modelUsed: (result as any).modelUsed ?? null,
+    };
+
+    const now = Date.now();
+    const maxAgeMs = 30 * 24 * 60 * 60 * 1000;
+    const pruned = existing
+      .filter((x) => x && x.id && x.id !== id)
+      .filter((x) => {
+        const t = Date.parse(String((x as any).sharedAt || ''));
+        return Number.isFinite(t) ? now - t < maxAgeMs : true;
+      })
+      .slice(0, 49);
+
+    await kvPutJson(resultsKv, galleryKey, { items: [item, ...pruned] });
+  } catch {
+    // Ignore gallery failures; sharing must still succeed.
+  }
+
   return new Response(JSON.stringify({ id, url: shareUrl }), {
     headers: { 'content-type': 'application/json; charset=utf-8' },
   });
 };
-

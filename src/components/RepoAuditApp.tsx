@@ -57,11 +57,41 @@ function InputCard(props: {
   const [model, setModel] = useState(RECOMMENDED_MODELS[0]!.id);
   const [customModel, setCustomModel] = useState('');
   const [ghToken, setGhToken] = useState('');
+  const [gallery, setGallery] = useState<Array<{ id: string; url: string; full_name: string; total: number; grade: string }>>(
+    [],
+  );
 
   const ref = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
     const t = setTimeout(() => ref.current?.focus(), 350);
     return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    let dead = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/gallery?limit=6');
+        if (!res.ok) return;
+        const json = (await res.json()) as { items?: any[] };
+        const items = Array.isArray(json.items) ? json.items : [];
+        const cleaned = items
+          .map((it) => ({
+            id: String(it?.id || ''),
+            url: String(it?.url || ''),
+            full_name: String(it?.full_name || ''),
+            total: Number(it?.total || 0),
+            grade: String(it?.grade || ''),
+          }))
+          .filter((it) => it.id && it.url && it.full_name);
+        if (!dead) setGallery(cleaned);
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      dead = true;
+    };
   }, []);
 
   const effectiveModel = (customModel || model).trim();
@@ -176,6 +206,30 @@ function InputCard(props: {
           </button>
         ))}
       </div>
+
+      {gallery.length ? (
+        <div className="mt-5">
+          <div className="mb-2 font-mono text-[11px] tracking-[.14em] text-dim">RECENT AUDITS</div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {gallery.map((it) => (
+              <a
+                key={it.id}
+                href={it.url}
+                className="group rounded-xl border border-border bg-bg p-3 transition hover:border-accent/35"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="truncate font-mono text-xs text-muted">{it.full_name}</div>
+                  <div className="flex items-baseline gap-2">
+                    <div className="font-mono text-[11px] text-dim">{it.total.toFixed(1)}</div>
+                    <div className="font-mono text-sm text-text">{it.grade}</div>
+                  </div>
+                </div>
+                <div className="mt-1 font-mono text-[11px] text-dim group-hover:text-muted">Open shared result</div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <details className="mt-5 rounded-xl border border-border bg-bg p-3">
         <summary className="cursor-pointer select-none font-mono text-xs text-muted">Advanced</summary>
@@ -336,6 +390,7 @@ export default function RepoAuditApp() {
 
   const share = useCallback(async () => {
     if (!result) return;
+    if (shareUrl) return;
     setSharing(true);
     setShareErr('');
     setShareUrl('');
@@ -358,7 +413,7 @@ export default function RepoAuditApp() {
     } finally {
       setSharing(false);
     }
-  }, [result]);
+  }, [result, shareUrl]);
 
   const audit = useCallback(async (repo: string, opts: { ai: boolean; model: string; ghToken?: string }) => {
     setError('');
@@ -379,6 +434,32 @@ export default function RepoAuditApp() {
       const res = await fetch(`/api/audit?${qp.toString()}`, { headers: Object.keys(headers).length ? headers : undefined });
       if (!res.ok) throw new Error(await res.text());
       const json = (await res.json()) as AuditResult;
+
+      // Default behavior: create a shareable URL for every audit.
+      try {
+        setSharing(true);
+        const shareRes = await fetch('/api/share', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ result: json }),
+        });
+        if (shareRes.ok) {
+          const shareJson = (await shareRes.json()) as { id: string; url: string };
+          setShareUrl(shareJson.url);
+          try {
+            await navigator.clipboard.writeText(shareJson.url);
+          } catch {
+            // ignore
+          }
+        } else {
+          setShareErr(await shareRes.text());
+        }
+      } catch (e2: any) {
+        setShareErr(String(e2?.message || 'Share failed'));
+      } finally {
+        setSharing(false);
+      }
+
       setResult(json);
       setLoading(false);
       setScreen('reveal');
@@ -398,7 +479,19 @@ export default function RepoAuditApp() {
   }
 
   if (screen === 'reveal' && result) {
-    return <RevealCard score={total} name={result.meta?.full_name || repoName} onContinue={() => setScreen('results')} />;
+    return (
+      <RevealCard
+        score={total}
+        name={result.meta?.full_name || repoName}
+        onContinue={() => {
+          if (shareUrl) {
+            window.location.assign(shareUrl);
+            return;
+          }
+          setScreen('results');
+        }}
+      />
+    );
   }
 
   if (screen === 'results' && result) {
@@ -413,7 +506,7 @@ export default function RepoAuditApp() {
               disabled={sharing}
               className="rounded-xl border border-border bg-surface px-4 py-2 font-mono text-[11px] text-muted transition hover:border-accent/40 hover:text-text disabled:opacity-50"
             >
-              {sharing ? 'Sharing…' : 'Share'}
+              {shareUrl ? 'Shared' : sharing ? 'Sharing…' : 'Share'}
             </button>
             {shareUrl ? (
               <a

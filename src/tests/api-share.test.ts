@@ -55,5 +55,10 @@ describe('/api/share', () => {
     const stored = JSON.parse(resultsKv.store.get(`share:${body.id}`)!);
     expect(stored.meta.full_name).toBe('acme/widgets');
     expect(typeof stored.sharedAt).toBe('string');
+
+    const gallery = JSON.parse(resultsKv.store.get('gallery:latest')!);
+    expect(Array.isArray(gallery.items)).toBe(true);
+    expect(gallery.items[0].id).toBe(body.id);
+    expect(gallery.items[0].full_name).toBe('acme/widgets');
   });
 });

@@ -15,6 +15,10 @@
 
 Shared UI route: `GET /r/:id`
 
+## Gallery
+
+`GET /api/gallery?limit=...` returns recently shared audits (derived from KV).
+
 ## Query params
 
 - `repo` (required): `owner/name`
