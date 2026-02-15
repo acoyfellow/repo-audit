@@ -3,35 +3,51 @@ import { Resvg } from '@cf-wasm/resvg';
 
 type Env = { ASSETS?: { fetch: (req: Request) => Promise<Response> } };
 
-let fontCache: ArrayBuffer[] | null = null;
+type FontData = { buffers: ArrayBuffer[]; base64Defs: string };
+let fontCache: FontData | null = null;
 
-async function loadFonts(env?: Env): Promise<ArrayBuffer[]> {
+function toBase64(buf: ArrayBuffer): string {
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
+  return btoa(binary);
+}
+
+async function loadFonts(env?: Env): Promise<FontData> {
   if (fontCache) return fontCache;
 
-  const fontPaths = ['/fonts/IBMPlexMono-Bold.ttf', '/fonts/IBMPlexMono-Regular.ttf', '/fonts/IBMPlexSans-Regular.ttf'];
+  const fontFiles: Array<{ path: string; family: string; weight: string }> = [
+    { path: '/fonts/IBMPlexMono-Bold.ttf', family: 'IBM Plex Mono', weight: 'bold' },
+    { path: '/fonts/IBMPlexMono-Regular.ttf', family: 'IBM Plex Mono', weight: 'normal' },
+    { path: '/fonts/IBMPlexSans-Regular.ttf', family: 'IBM Plex Sans', weight: 'normal' },
+  ];
+
   const buffers: ArrayBuffer[] = [];
+  const fontFaces: string[] = [];
 
   const fetcher = env?.ASSETS;
   if (!fetcher) {
-    console.warn('OG: No ASSETS binding available for font loading');
-    return buffers;
+    console.warn('OG: No ASSETS binding');
+    return { buffers: [], base64Defs: '' };
   }
 
-  for (const path of fontPaths) {
+  for (const f of fontFiles) {
     try {
-      const res = await fetcher.fetch(new Request(`http://fakehost${path}`));
+      const res = await fetcher.fetch(new Request(`http://fakehost${f.path}`));
       if (res.ok) {
-        buffers.push(await res.arrayBuffer());
-      } else {
-        console.warn(`OG: Font fetch failed for ${path}: ${res.status}`);
+        const buf = await res.arrayBuffer();
+        buffers.push(buf);
+        const b64 = toBase64(buf);
+        fontFaces.push(
+          `@font-face { font-family: '${f.family}'; font-weight: ${f.weight}; src: url('data:font/ttf;base64,${b64}') format('truetype'); }`
+        );
       }
-    } catch (e) {
-      console.warn(`OG: Font fetch error for ${path}:`, e);
-    }
+    } catch { /* ignore */ }
   }
 
-  if (buffers.length) fontCache = buffers;
-  return buffers;
+  const base64Defs = fontFaces.length ? `<style>${fontFaces.join(' ')}</style>` : '';
+  fontCache = { buffers, base64Defs };
+  return fontCache;
 }
 
 export const prerender = false;
@@ -164,12 +180,13 @@ export const GET: APIRoute = async ({ request, locals }) => {
   // Render SVG to PNG
   try {
     const runtimeEnv = ((locals as Record<string, unknown>)?.runtime as Record<string, unknown> | undefined)?.env as Env | undefined;
-    const fonts = await loadFonts(runtimeEnv);
-    console.log(`OG: loaded ${fonts.length} fonts, sizes: ${fonts.map(f => f.byteLength).join(', ')}`);
-    const resvg = new Resvg(svg, {
+    const fontData = await loadFonts(runtimeEnv);
+    // Inject base64 font-face defs into the SVG so resvg can resolve them
+    const svgWithFonts = svg.replace('<defs>', `<defs>${fontData.base64Defs}`);
+    const resvg = new Resvg(svgWithFonts, {
       fitTo: { mode: 'width' as const, value: 1200 },
       font: {
-        fontBuffers: fonts.map(b => new Uint8Array(b)),
+        fontBuffers: fontData.buffers.map(b => new Uint8Array(b)),
         defaultFontFamily: 'IBM Plex Mono',
       },
     });
