@@ -1,22 +1,33 @@
 import type { APIRoute } from 'astro';
 import { Resvg } from '@cf-wasm/resvg';
 
+type Env = { ASSETS?: { fetch: (req: Request) => Promise<Response> } };
+
 let fontCache: ArrayBuffer[] | null = null;
 
-async function loadFonts(requestUrl: string): Promise<ArrayBuffer[]> {
+async function loadFonts(env?: Env): Promise<ArrayBuffer[]> {
   if (fontCache) return fontCache;
 
-  const base = new URL(requestUrl).origin;
   const fontPaths = ['/fonts/IBMPlexMono-Bold.ttf', '/fonts/IBMPlexMono-Regular.ttf', '/fonts/IBMPlexSans-Regular.ttf'];
   const buffers: ArrayBuffer[] = [];
 
+  const fetcher = env?.ASSETS;
+  if (!fetcher) {
+    console.warn('OG: No ASSETS binding available for font loading');
+    return buffers;
+  }
+
   for (const path of fontPaths) {
     try {
-      const res = await fetch(`${base}${path}`);
+      const res = await fetcher.fetch(new Request(`http://fakehost${path}`));
       if (res.ok) {
         buffers.push(await res.arrayBuffer());
+      } else {
+        console.warn(`OG: Font fetch failed for ${path}: ${res.status}`);
       }
-    } catch { /* ignore */ }
+    } catch (e) {
+      console.warn(`OG: Font fetch error for ${path}:`, e);
+    }
   }
 
   if (buffers.length) fontCache = buffers;
@@ -128,7 +139,7 @@ function buildSvg(params: {
 </svg>`;
 }
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, locals }) => {
   const url = new URL(request.url);
   const repo = url.searchParams.get('repo') ?? undefined;
   const scoreRaw = url.searchParams.get('score');
@@ -152,7 +163,8 @@ export const GET: APIRoute = async ({ request }) => {
 
   // Render SVG to PNG
   try {
-    const fonts = await loadFonts(request.url);
+    const runtimeEnv = ((locals as Record<string, unknown>)?.runtime as Record<string, unknown> | undefined)?.env as Env | undefined;
+    const fonts = await loadFonts(runtimeEnv);
     console.log(`OG: loaded ${fonts.length} fonts, sizes: ${fonts.map(f => f.byteLength).join(', ')}`);
     const resvg = new Resvg(svg, {
       fitTo: { mode: 'width' as const, value: 1200 },
