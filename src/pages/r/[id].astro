@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ResultsView from '../../components/ResultsView';
 import { kvGetJson } from '../../lib/kvJson';
+import { computeTotal } from '../../lib/categories';
+import { getGrade } from '../../lib/grades';
 import type { AuditResult } from '../../lib/auditTypes';
 
 export const prerender = false;
@@ -14,12 +16,43 @@ let stored: (AuditResult & { sharedAt?: string }) | null = null;
 if (resultsKv && id) stored = await kvGetJson(resultsKv, `share:${id}`);
 
 const found = !!stored;
-const title = found ? `${stored!.meta.full_name} · Repo Audit` : 'Shared Audit Not Found · Repo Audit';
+const repoName = stored?.meta?.full_name ?? '';
+const total = stored ? computeTotal(stored.scores) : 0;
+const grade = getGrade(total);
+const repoDesc = stored?.meta?.description ?? '';
+
+const title = found
+  ? `${repoName} scored ${total.toFixed(1)}/10 (${grade.letter}) · Repo Audit`
+  : 'Shared Audit Not Found · Repo Audit';
 const robots = found ? 'index,follow' : 'noindex,nofollow';
-const description = found ? `Shared audit results for ${stored!.meta.full_name}.` : 'Shared audit result not found.';
+const description = found
+  ? `${repoName} earned a ${grade.letter} grade (${total.toFixed(1)}/10) — ${grade.label}. ${repoDesc}`.trim()
+  : 'Shared audit result not found.';
+
+const site = Astro.site ?? new URL('https://repo-audit.coey.dev');
+const ogParams = new URLSearchParams();
+if (repoName) ogParams.set('repo', repoName);
+if (total) ogParams.set('score', total.toFixed(1));
+if (repoDesc) ogParams.set('desc', repoDesc.slice(0, 120));
+const ogImage = found ? new URL(`/api/og.png?${ogParams.toString()}`, site).toString() : undefined;
+
+const jsonLd = found ? {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: repoName,
+  description: repoDesc || description,
+  applicationCategory: 'DeveloperApplication',
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: total.toFixed(1),
+    bestRating: '10',
+    worstRating: '0',
+    ratingCount: 1,
+  },
+} : undefined;
 ---
 
-<BaseLayout title={title} description={description} robots={robots}>
+<BaseLayout title={title} description={description} robots={robots} ogImage={ogImage} jsonLd={jsonLd}>
   <main class="min-h-dvh px-4 py-10">
     <div class="mx-auto w-full max-w-2xl">
       <div class="mb-7 flex flex-wrap items-center justify-between gap-3">

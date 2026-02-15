@@ -5,15 +5,18 @@ type Props = {
   title?: string;
   description?: string;
   robots?: string;
+  ogImage?: string;
+  jsonLd?: Record<string, unknown>;
 };
 
-const title = Astro.props.title ?? 'Repo Audit';
-const description = Astro.props.description ?? 'AI-powered open-source repository scoring.';
+const title = Astro.props.title ?? 'Repo Audit — Open-Source Repository Scoring';
+const description = Astro.props.description ?? 'Deterministic scoring plus an optional Workers AI qualitative pass. Designed for fast, opinionated repo triage.';
 const robots = Astro.props.robots ?? 'index,follow';
 
 const site = Astro.site ?? new URL('https://repo-audit.coey.dev');
 const canonical = new URL(Astro.url.pathname, site).toString();
-const ogImage = new URL('/og.png', site).toString();
+const ogImage = Astro.props.ogImage ?? new URL('/api/og.png', site).toString();
+const jsonLd = Astro.props.jsonLd;
 ---
 
 <!doctype html>
@@ -42,11 +45,18 @@ const ogImage = new URL('/og.png', site).toString();
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+
+    {jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
 
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="application-name" content="Repo Audit" />

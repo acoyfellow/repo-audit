@@ -23,7 +23,20 @@ const gallery =
     : [];
 ---
 
-<BaseLayout title="Repo Audit">
+<BaseLayout
+  title="Repo Audit — Open-Source Repository Scoring"
+  description="Score any GitHub repository in seconds. Deterministic analysis across 11 categories plus optional Workers AI insights. Free, fast, opinionated."
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Repo Audit',
+    url: 'https://repo-audit.coey.dev',
+    description: 'Score any GitHub repository in seconds. Deterministic analysis across 11 categories plus optional Workers AI insights.',
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Any',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  }}
+>
   <main class="min-h-dvh px-4 py-10">
     <div class="mx-auto w-full max-w-2xl">
       <div class="mb-8 flex items-end justify-between gap-4">
