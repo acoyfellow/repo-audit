@@ -51,7 +51,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 export const GET: APIRoute = async ({ request, locals }) => {
   const url = new URL(request.url);
   const limitRaw = url.searchParams.get('limit');
-  const limit = Math.max(1, Math.min(24, Number(limitRaw || '8') || 8));
+  const limit = Math.max(1, Math.min(100, Number(limitRaw || '8') || 8));
 
   const env = (locals as any)?.runtime?.env as { RESULTS?: KVNamespace } | undefined;
   const resultsKv = env?.RESULTS;

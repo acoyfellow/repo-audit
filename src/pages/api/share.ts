@@ -141,7 +141,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const t = Date.parse(String((x as any).sharedAt || ''));
         return Number.isFinite(t) ? now - t < maxAgeMs : true;
       })
-      .slice(0, 49);
+      .slice(0, 99);
 
     await kvPutJson(resultsKv, galleryKey, { items: [item, ...pruned] });
   } catch {

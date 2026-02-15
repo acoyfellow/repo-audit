@@ -45,6 +45,57 @@ type Screen = 'input' | 'loading' | 'reveal' | 'results';
 
 type GalleryItem = { id: string; url: string; full_name: string; total: number; grade: string };
 
+function GallerySection({ gallery }: { gallery: GalleryItem[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const sorted = useMemo(
+    () => [...gallery].sort((a, b) => b.total - a.total),
+    [gallery],
+  );
+  const visible = expanded ? sorted : sorted.slice(0, 6);
+  const hasMore = sorted.length > 6;
+
+  return (
+    <div className="mt-5">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="font-mono text-[11px] tracking-[.14em] text-dim">RECENT AUDITS</div>
+        <div className="font-mono text-[11px] text-dim">{sorted.length} repos</div>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {visible.map((it) => (
+          <a
+            key={it.id}
+            href={it.url}
+            className="group rounded-xl border border-border bg-bg p-3 transition hover:border-accent/35"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="truncate font-mono text-xs text-muted">{it.full_name}</div>
+              <div className="flex items-baseline gap-2">
+                <div className="font-mono text-[11px] text-dim">{it.total.toFixed(1)}</div>
+                <div className={`font-mono text-sm ${
+                  it.grade === 'A' ? 'text-green-400' :
+                  it.grade === 'B' ? 'text-emerald-400' :
+                  it.grade === 'C' ? 'text-yellow-400' :
+                  it.grade === 'D' ? 'text-orange-400' :
+                  'text-red-400'
+                }`}>{it.grade}</div>
+              </div>
+            </div>
+            <div className="mt-1 font-mono text-[11px] text-dim group-hover:text-muted">Open shared result</div>
+          </a>
+        ))}
+      </div>
+      {hasMore ? (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-3 w-full rounded-lg border border-border bg-bg py-2 font-mono text-xs text-muted transition hover:border-accent/35 hover:text-text"
+        >
+          {expanded ? 'Show less' : `Show all ${sorted.length} repos`}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function InputCard(props: {
   onSubmit: (repo: string, opts: { ai: boolean; model: string; ghToken?: string }) => void;
   error: string;
@@ -73,7 +124,7 @@ function InputCard(props: {
     let dead = false;
     (async () => {
       try {
-        const res = await fetch('/api/gallery?limit=6');
+        const res = await fetch('/api/gallery?limit=50');
         if (!res.ok) return;
         const json = (await res.json()) as { items?: any[] };
         const items = Array.isArray(json.items) ? json.items : [];
@@ -210,27 +261,7 @@ function InputCard(props: {
       </div>
 
       {gallery.length ? (
-        <div className="mt-5">
-          <div className="mb-2 font-mono text-[11px] tracking-[.14em] text-dim">RECENT AUDITS</div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {gallery.map((it) => (
-              <a
-                key={it.id}
-                href={it.url}
-                className="group rounded-xl border border-border bg-bg p-3 transition hover:border-accent/35"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="truncate font-mono text-xs text-muted">{it.full_name}</div>
-                  <div className="flex items-baseline gap-2">
-                    <div className="font-mono text-[11px] text-dim">{it.total.toFixed(1)}</div>
-                    <div className="font-mono text-sm text-text">{it.grade}</div>
-                  </div>
-                </div>
-                <div className="mt-1 font-mono text-[11px] text-dim group-hover:text-muted">Open shared result</div>
-              </a>
-            ))}
-          </div>
-        </div>
+        <GallerySection gallery={gallery} />
       ) : null}
 
       <details className="mt-5 rounded-xl border border-border bg-bg p-3">
