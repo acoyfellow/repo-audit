@@ -19,7 +19,7 @@ const env = (Astro.locals as any)?.runtime?.env as { RESULTS?: KVNamespace } | u
 const resultsKv = env?.RESULTS;
 const gallery =
   resultsKv
-    ? ((await kvGetJson<{ items?: GalleryItem[] }>(resultsKv, 'gallery:latest'))?.items ?? []).slice(0, 6)
+    ? ((await kvGetJson<{ items?: GalleryItem[] }>(resultsKv, 'gallery:latest'))?.items ?? [])
     : [];
 ---
 
