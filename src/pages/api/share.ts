@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { rateLimitFixedWindow } from '../../lib/rateLimit';
 import { kvGetJson, kvPutJson } from '../../lib/kvJson';
-import { randomId } from '../../lib/id';
+import { randomId, repoId } from '../../lib/id';
 import type { AuditResult } from '../../lib/auditTypes';
 import { computeTotal } from '../../lib/categories';
 import { getGrade } from '../../lib/grades';
@@ -105,7 +105,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  const id = randomId(10);
+  const fullName = String((result as any).meta?.full_name || '');
+  const id = fullName ? await repoId(fullName) : randomId(10);
   const key = `share:${id}`;
   const sharedAt = new Date().toISOString();
   const stored = { ...result, sharedAt };
@@ -131,8 +132,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const now = Date.now();
     const maxAgeMs = 30 * 24 * 60 * 60 * 1000;
+    const normalizedName = fullName.trim().toLowerCase();
     const pruned = existing
       .filter((x) => x && x.id && x.id !== id)
+      // Deduplicate by repo name so re-audits don't stack up
+      .filter((x) => x.full_name.trim().toLowerCase() !== normalizedName)
       .filter((x) => {
         const t = Date.parse(String((x as any).sharedAt || ''));
         return Number.isFinite(t) ? now - t < maxAgeMs : true;
