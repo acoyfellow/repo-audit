@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "repo-audit",
+  "main": "./dist/_worker.js/index.js",
+  "compatibility_date": "2026-02-14",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "workers_dev": true,
+  "preview_urls": true,
+
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist"
+  },
+  "ai": {
+    "binding": "AI"
+  },
+
+  "observability": {
+    "enabled": true
+  },
+
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT",
+      "id": "<YOUR_RATE_LIMIT_KV_ID>",
+      "preview_id": "<YOUR_RATE_LIMIT_KV_PREVIEW_ID>"
+    },
+    {
+      "binding": "RESULTS",
+      "id": "<YOUR_RESULTS_KV_ID>",
+      "preview_id": "<YOUR_RESULTS_KV_PREVIEW_ID>"
+    }
+  ]
+}
+

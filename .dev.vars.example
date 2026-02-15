@@ -1,0 +1,4 @@
+# Optional: raises GitHub rate limits for server-side API calls.
+# Create a GitHub classic token with no scopes (public-only) or fine-grained read-only.
+GITHUB_TOKEN=
+

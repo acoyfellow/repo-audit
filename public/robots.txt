@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://repo-audit.coey.dev/sitemap-index.xml
+

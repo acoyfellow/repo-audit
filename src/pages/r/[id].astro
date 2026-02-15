@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ResultsView from '../../components/ResultsView';
+import { kvGetJson } from '../../lib/kvJson';
+import type { AuditResult } from '../../lib/auditTypes';
+
+export const prerender = false;
+
+const id = (Astro.params.id ?? '').trim();
+const env = (Astro.locals as any)?.runtime?.env as { RESULTS?: KVNamespace } | undefined;
+const resultsKv = env?.RESULTS;
+
+let stored: (AuditResult & { sharedAt?: string }) | null = null;
+if (resultsKv && id) stored = await kvGetJson(resultsKv, `share:${id}`);
+
+const found = !!stored;
+const title = found ? `${stored!.meta.full_name} · Repo Audit` : 'Shared Audit Not Found · Repo Audit';
+const robots = found ? 'index,follow' : 'noindex,nofollow';
+const description = found ? `Shared audit results for ${stored!.meta.full_name}.` : 'Shared audit result not found.';
+---
+
+<BaseLayout title={title} description={description} robots={robots}>
+  <main class="min-h-dvh px-4 py-10">
+    <div class="mx-auto w-full max-w-2xl">
+      <div class="mb-7 flex flex-wrap items-center justify-between gap-3">
+        <a
+          href="/"
+          class="rounded-lg border border-border bg-surface px-3 py-2 font-mono text-[11px] text-dim transition hover:border-accent/40 hover:text-text"
+        >
+          home
+        </a>
+        <div class="font-mono text-[11px] text-dim">shared result</div>
+      </div>
+
+      {found ? (
+        <>
+          {stored!.sharedAt ? (
+            <div class="mb-3 font-mono text-[11px] text-dim">
+              Shared {new Date(stored!.sharedAt).toLocaleString()}
+            </div>
+          ) : null}
+          <ResultsView result={stored as AuditResult} />
+          <div class="mt-8 flex justify-center pb-6">
+            <a
+              href="/"
+              class="rounded-xl border border-border bg-surface px-5 py-3 font-mono text-xs text-muted transition hover:border-accent/40 hover:text-text"
+            >
+              Audit Another Repo
+            </a>
+          </div>
+        </>
+      ) : (
+        <div class="rounded-2xl border border-border bg-surface p-6">
+          <div class="font-display text-2xl text-text">Not found</div>
+          <p class="mt-2 font-body text-sm leading-relaxed text-muted">
+            This shared audit link is missing or expired. Shared results are stored for 30 days.
+          </p>
+          <div class="mt-5">
+            <a
+              href="/"
+              class="inline-block rounded-xl border border-border bg-bg px-5 py-3 font-mono text-xs text-muted transition hover:border-accent/40 hover:text-text"
+            >
+              Run an audit
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  </main>
+</BaseLayout>

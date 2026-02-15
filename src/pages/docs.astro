@@ -1,0 +1,65 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+---
+
+<DocLayout title="Docs · Repo Audit" description="Documentation for Repo Audit (Diataxis).">
+  <h1>Docs</h1>
+  <p>
+    Repo Audit’s documentation is structured using <strong>Diataxis</strong>: Tutorials, How-to guides, Reference, and
+    Explanation.
+  </p>
+
+  <h2>Map</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>What it is</th>
+        <th>Start here</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Tutorial</strong></td>
+        <td>Step-by-step learning path.</td>
+        <td>
+          <a href="https://github.com/acoyfellow/repo-audit/blob/main/docs/tutorials/first-audit.md" target="_blank" rel="noreferrer">
+            Run your first audit
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>How-to</strong></td>
+        <td>Task-oriented recipes.</td>
+        <td>
+          <a href="https://github.com/acoyfellow/repo-audit/blob/main/docs/how-to/kv.md" target="_blank" rel="noreferrer">
+            Set up KV
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Reference</strong></td>
+        <td>Exact interfaces and configuration.</td>
+        <td>
+          <a href="https://github.com/acoyfellow/repo-audit/blob/main/docs/reference/api.md" target="_blank" rel="noreferrer">
+            API reference
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Explanation</strong></td>
+        <td>The “why”: background and design decisions.</td>
+        <td>
+          <a href="https://github.com/acoyfellow/repo-audit/blob/main/docs/explanation/architecture.md" target="_blank" rel="noreferrer">
+            Architecture
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>In-app docs</h2>
+  <p>
+    The scoring rubric is available at <a href="/matrix">/matrix</a>. Model picks are at <a href="/models">/models</a>.
+  </p>
+</DocLayout>

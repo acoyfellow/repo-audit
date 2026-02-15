@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const groups = [
+  {
+    title: 'LLMs (chat)',
+    items: [
+      { id: '@cf/zai-org/glm-4.7-flash', note: 'Fast default' },
+      { id: '@cf/openai/gpt-oss-20b', note: 'Balanced quality/cost' },
+      { id: '@cf/openai/gpt-oss-120b', note: 'Best quality, higher cost' },
+      { id: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', note: 'Strong general LLM' },
+      { id: '@cf/meta/llama-4-scout-17b-16e-instruct', note: 'Newer, fast' },
+      { id: '@cf/meta/llama-4-maverick-17b-128e-instruct-fp8', note: 'Newer, higher quality' },
+    ],
+  },
+  {
+    title: 'Embeddings',
+    items: [
+      { id: '@cf/baai/bge-small-en-v1.5', note: 'Fast' },
+      { id: '@cf/baai/bge-base-en-v1.5', note: 'Balanced' },
+      { id: '@cf/baai/bge-large-en-v1.5', note: 'Higher quality' },
+    ],
+  },
+  {
+    title: 'Images',
+    items: [
+      { id: '@cf/stabilityai/stable-diffusion-xl-base-1.0', note: 'SDXL base' },
+      { id: '@cf/black-forest-labs/flux-1-schnell', note: 'Fast flux' },
+    ],
+  },
+  {
+    title: 'Speech / Translation',
+    items: [
+      { id: '@cf/openai/whisper', note: 'Speech-to-text' },
+      { id: '@cf/meta/m2m100-1.2b', note: 'Translation' },
+    ],
+  },
+];
+---
+
+<BaseLayout title="Workers AI Models">
+  <main class="min-h-dvh px-4 py-10">
+    <div class="mx-auto w-full max-w-2xl">
+      <div class="mb-7">
+        <div class="font-mono text-[11px] tracking-[.16em] text-dim">REFERENCE</div>
+        <h1 class="mt-1 font-display text-4xl tracking-tight">Workers AI model picks</h1>
+        <p class="mt-3 font-body text-sm leading-relaxed text-muted">
+          The app accepts any model id that starts with <span class="font-mono text-xs text-text">@cf/</span> or{' '}
+          <span class="font-mono text-xs text-text">@hf/</span>. This page is just a curated set to get started.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a class="rounded-lg border border-border bg-surface px-3 py-2 font-mono text-[11px] text-dim transition hover:border-accent/40 hover:text-text" href="/">
+            back
+          </a>
+          <a
+            class="rounded-lg border border-border bg-surface px-3 py-2 font-mono text-[11px] text-dim transition hover:border-accent/40 hover:text-text"
+            href="https://developers.cloudflare.com/workers-ai/models/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            full catalog
+          </a>
+        </div>
+      </div>
+
+      <div class="grid gap-3">
+        {groups.map((g) => (
+          <section class="rounded-2xl border border-border bg-surface p-5">
+            <h2 class="font-mono text-[11px] tracking-[.14em] text-muted">{g.title}</h2>
+            <div class="mt-3 grid gap-2">
+              {g.items.map((it) => (
+                <div class="rounded-xl border border-border bg-bg p-3">
+                  <div class="font-mono text-xs text-text">{it.id}</div>
+                  <div class="mt-1 font-body text-sm text-dim">{it.note}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </div>
+  </main>
+</BaseLayout>

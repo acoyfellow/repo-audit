@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RepoAuditApp from '../components/RepoAuditApp';
+---
+
+<BaseLayout title="Repo Audit">
+  <main class="min-h-dvh px-4 py-10">
+    <div class="mx-auto w-full max-w-2xl">
+      <div class="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <div class="font-mono text-[11px] tracking-[.16em] text-dim">OPEN-SOURCE SCORING</div>
+          <h1 class="font-display text-5xl leading-none tracking-tight">
+            Repository <span class="font-bold italic text-accent">Audit</span>
+          </h1>
+          <p class="mt-3 max-w-[58ch] font-body text-sm leading-relaxed text-muted">
+            Deterministic scoring plus an optional Workers AI qualitative pass. Designed for fast, opinionated repo triage.
+          </p>
+        </div>
+        <a
+          class="hidden rounded-lg border border-border bg-surface px-3 py-2 font-mono text-[11px] text-dim transition hover:border-accent/40 hover:text-text sm:inline-block"
+          href="/matrix"
+        >
+          scoring matrix
+        </a>
+      </div>
+
+      <RepoAuditApp client:load />
+
+      <div class="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
+        <div class="font-mono text-[11px] text-dim">
+          Deployed on Cloudflare Workers. API: <span class="text-muted">/api/audit</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <a
+            class="rounded-lg border border-border bg-surface px-3 py-2 font-mono text-[11px] text-dim transition hover:border-accent/40 hover:text-text"
+            href="/docs"
+          >
+            docs
+          </a>
+          <a
+            class="rounded-lg border border-border bg-surface px-3 py-2 font-mono text-[11px] text-dim transition hover:border-accent/40 hover:text-text sm:hidden"
+            href="/matrix"
+          >
+            matrix
+          </a>
+          <a
+            class="rounded-lg border border-border bg-surface px-3 py-2 font-mono text-[11px] text-dim transition hover:border-accent/40 hover:text-text"
+            href="/models"
+          >
+            model picks
+          </a>
+          <a
+            class="rounded-lg border border-border bg-surface px-3 py-2 font-mono text-[11px] text-dim transition hover:border-accent/40 hover:text-text"
+            href="https://developers.cloudflare.com/workers-ai/models/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            workers ai models
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

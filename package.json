@@ -1,0 +1,45 @@
+{
+  "name": "repo-audit",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "npm run build && wrangler dev",
+    "dev:cf": "npm run build && wrangler dev --remote",
+    "deploy": "npm run build && wrangler deploy",
+    "icons": "node scripts/generate-icons.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "astro": "astro",
+    "wrangler": "wrangler"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/tailwind": "^6.0.2",
+    "@cloudflare/workers-types": "^4.20260214.0",
+    "@fontsource/cormorant-garamond": "^5.2.11",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/ibm-plex-sans": "^5.2.8",
+    "astro": "^5.17.1",
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwindcss": "^3.4.19",
+    "wrangler": "^4.65.0"
+  },
+  "overrides": {
+    "wrangler": "^4.65.0",
+    "undici": "^7.18.2"
+  },
+  "devDependencies": {
+    "@astrojs/sitemap": "^3.7.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@vitest/coverage-v8": "^4.0.18",
+    "png-to-ico": "^3.0.1",
+    "vitest": "^4.0.18"
+  }
+}
