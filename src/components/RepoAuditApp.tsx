@@ -72,11 +72,11 @@ function GallerySection({ gallery }: { gallery: GalleryItem[] }) {
               <div className="flex items-baseline gap-2">
                 <div className="font-mono text-[11px] text-dim">{it.total.toFixed(1)}</div>
                 <div className={`font-mono text-sm ${
-                  it.grade === 'A' ? 'text-green-400' :
-                  it.grade === 'B' ? 'text-emerald-400' :
-                  it.grade === 'C' ? 'text-yellow-400' :
-                  it.grade === 'D' ? 'text-orange-400' :
-                  'text-red-400'
+                  it.grade === 'A' ? 'text-green-500' :
+                  it.grade === 'B' ? 'text-emerald-500' :
+                  it.grade === 'C' ? 'text-yellow-500' :
+                  it.grade === 'D' ? 'text-orange-500' :
+                  'text-red-500'
                 }`}>{it.grade}</div>
               </div>
             </div>

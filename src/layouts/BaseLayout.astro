@@ -27,7 +27,14 @@ const ogImage = new URL('/og.png', site).toString();
     <link rel="canonical" href={canonical} />
     <meta name="robots" content={robots} />
     <meta name="theme-color" content="#00d4aa" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
+    <script is:inline>
+      (function() {
+        var t = localStorage.getItem('theme');
+        if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Repo Audit" />
@@ -61,10 +68,39 @@ const ogImage = new URL('/og.png', site).toString();
 
     <script is:inline>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function() {});
         });
       }
+
+      (function() {
+        function updateIcons(theme) {
+          var sun = document.getElementById('icon-sun');
+          var moon = document.getElementById('icon-moon');
+          if (!sun || !moon) return;
+          if (theme === 'dark') {
+            sun.classList.remove('hidden');
+            moon.classList.add('hidden');
+          } else {
+            sun.classList.add('hidden');
+            moon.classList.remove('hidden');
+          }
+        }
+
+        var current = document.documentElement.getAttribute('data-theme') || 'dark';
+        updateIcons(current);
+
+        var btn = document.getElementById('theme-toggle');
+        if (btn) {
+          btn.addEventListener('click', function() {
+            var now = document.documentElement.getAttribute('data-theme') || 'dark';
+            var next = now === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateIcons(next);
+          });
+        }
+      })();
     </script>
   </body>
 </html>

@@ -9,8 +9,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* RGB triplets for Tailwind color mapping */
+/* Dark theme (default) */
+:root,
+:root[data-theme='dark'] {
   --c-bg: 8 8 10;
   --c-surface: 15 15 18;
   --c-surface-2: 22 22 27;
@@ -18,9 +19,25 @@
   --c-text: 228 228 234;
   --c-muted: 122 122 136;
   --c-dim: 74 74 85;
-  --c-accent: 0 212 170;
+  --c-accent: 0 178 143;
   --c-warn: 255 136 68;
   --c-bad: 255 68 102;
+  color-scheme: dark;
+}
+
+/* Light theme */
+:root[data-theme='light'] {
+  --c-bg: 250 250 252;
+  --c-surface: 255 255 255;
+  --c-surface-2: 243 243 247;
+  --c-border: 218 218 228;
+  --c-text: 28 28 35;
+  --c-muted: 100 100 118;
+  --c-dim: 155 155 170;
+  --c-accent: 0 158 128;
+  --c-warn: 210 100 30;
+  --c-bad: 210 40 65;
+  color-scheme: light;
 }
 
 html,
@@ -40,7 +57,11 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.03;
+  opacity: 0.025;
+}
+
+:root[data-theme='light'] .noise {
+  opacity: 0.015;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
