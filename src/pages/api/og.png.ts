@@ -190,13 +190,11 @@ export const GET: APIRoute = async ({ request, locals }) => {
       },
     });
   } catch (err: unknown) {
-    // Fallback: return SVG if PNG rendering fails
-    console.error('resvg PNG render failed:', err);
-    return new Response(svg, {
-      headers: {
-        'content-type': 'image/svg+xml',
-        'cache-control': 'public, max-age=3600',
-      },
+    // Return error details for debugging
+    const msg = err instanceof Error ? err.message + '\n' + err.stack : String(err);
+    return new Response(JSON.stringify({ error: msg, fontLoaded: !!fontCache.mono }), {
+      status: 500,
+      headers: { 'content-type': 'application/json' },
     });
   }
 };
