@@ -3,25 +3,20 @@ import { Resvg } from '@cf-wasm/resvg';
 
 let fontCache: ArrayBuffer[] | null = null;
 
-async function loadFonts(env?: { ASSETS?: { fetch: (req: Request | string) => Promise<Response> } }, requestUrl?: string): Promise<ArrayBuffer[]> {
+async function loadFonts(requestUrl: string): Promise<ArrayBuffer[]> {
   if (fontCache) return fontCache;
 
+  const base = new URL(requestUrl).origin;
   const fontPaths = ['/fonts/IBMPlexMono-Bold.ttf', '/fonts/IBMPlexMono-Regular.ttf', '/fonts/IBMPlexSans-Regular.ttf'];
   const buffers: ArrayBuffer[] = [];
 
   for (const path of fontPaths) {
-    let res: Response | null = null;
-    // Try ASSETS binding first (production), then fetch (dev)
-    if (env?.ASSETS) {
-      try { res = await env.ASSETS.fetch(new Request(`https://dummy${path}`)); } catch { /* ignore */ }
-    }
-    if (!res?.ok && requestUrl) {
-      const base = new URL(requestUrl).origin;
-      res = await fetch(`${base}${path}`);
-    }
-    if (res?.ok) {
-      buffers.push(await res.arrayBuffer());
-    }
+    try {
+      const res = await fetch(`${base}${path}`);
+      if (res.ok) {
+        buffers.push(await res.arrayBuffer());
+      }
+    } catch { /* ignore */ }
   }
 
   if (buffers.length) fontCache = buffers;
@@ -133,7 +128,7 @@ function buildSvg(params: {
 </svg>`;
 }
 
-export const GET: APIRoute = async ({ request, locals }) => {
+export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const repo = url.searchParams.get('repo') ?? undefined;
   const scoreRaw = url.searchParams.get('score');
@@ -141,7 +136,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
   const description = url.searchParams.get('desc') ?? undefined;
   const format = url.searchParams.get('format') ?? 'png';
 
-  const env = (locals as Record<string, unknown>)?.runtime as { env?: { ASSETS?: { fetch: (req: Request | string) => Promise<Response> } } } | undefined;
+
 
   const grade = score != null ? getGradeInfo(score) : undefined;
   const svg = buildSvg({ repo, score, grade, description });
@@ -157,7 +152,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
   // Render SVG to PNG
   try {
-    const fonts = await loadFonts(env?.env, request.url);
+    const fonts = await loadFonts(request.url);
+    console.log(`OG: loaded ${fonts.length} fonts, sizes: ${fonts.map(f => f.byteLength).join(', ')}`);
     const resvg = new Resvg(svg, {
       fitTo: { mode: 'width' as const, value: 1200 },
       font: {
