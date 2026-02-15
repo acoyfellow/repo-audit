@@ -174,7 +174,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const origin = new URL(request.url).origin;
     await loadFonts(origin, env?.ASSETS as { fetch: (input: string | Request) => Promise<Response> } | undefined);
 
-    const resvg = new Resvg(svg, {
+    const resvg = await Resvg.async(svg, {
       font: {
         fontBuffers: [fontCache.mono!, fontCache.monoRegular!, fontCache.sans!],
         defaultFontFamily: 'IBM Plex Mono',
