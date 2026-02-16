@@ -1,0 +1,11 @@
+# Trivy security scanning configuration
+# https://aquasecurity.github.io/trivy/
+severity:
+  - CRITICAL
+  - HIGH
+
+scan:
+  skip-dirs:
+    - node_modules
+    - dist
+    - .wrangler
