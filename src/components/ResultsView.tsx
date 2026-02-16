@@ -247,8 +247,8 @@ export default function ResultsView(props: {
               </div>
               {result.fileTree.highlights.length > 0 ? (
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
-                  {result.fileTree.highlights.map((h, i) => (
-                    <span key={i} className="font-mono text-[11px] text-muted">• {h}</span>
+                  {result.fileTree.highlights.map((h) => (
+                    <span key={h} className="font-mono text-[11px] text-muted">• {h}</span>
                   ))}
                 </div>
               ) : null}
