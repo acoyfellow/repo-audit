@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "full_name": "example/repo",
+    "description": "Sample fixture for testing",
+    "stargazers_count": 50,
+    "forks_count": 5,
+    "open_issues_count": 2,
+    "topics": ["example"],
+    "homepage": null,
+    "language": "TypeScript",
+    "license": { "spdx_id": "MIT", "name": "MIT License" },
+    "has_wiki": false,
+    "has_discussions": false,
+    "archived": false,
+    "allow_forking": true,
+    "created_at": "2024-06-01T00:00:00Z"
+  },
+  "scores": {
+    "firstImpressions": 5.0,
+    "readme": 6.0,
+    "documentation": 4.0,
+    "codeQuality": 7.0,
+    "testing": 3.0,
+    "cicd": 5.0,
+    "security": 4.0,
+    "community": 3.0,
+    "maintenance": 5.0,
+    "dx": 4.0,
+    "licensing": 9.0
+  }
+}
