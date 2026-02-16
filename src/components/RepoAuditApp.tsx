@@ -64,7 +64,7 @@ function GallerySection({ gallery }: { gallery: GalleryItem[] }) {
         {visible.map((it) => (
           <a
             key={it.id}
-            href={it.url}
+            href={`/r/${it.id}`}
             className="group rounded-xl border border-border bg-bg p-3 transition hover:border-accent/35"
           >
             <div className="flex items-center justify-between gap-3">
@@ -437,7 +437,7 @@ export default function RepoAuditApp(props: { initialGallery?: GalleryItem[] }) 
       const json = (await res.json()) as { id: string; url: string };
       setShareUrl(json.url);
       try {
-        await navigator.clipboard.writeText(json.url);
+        await navigator.clipboard.writeText(new URL(json.url, window.location.origin).toString());
       } catch {
         // Clipboard may be unavailable (permissions/browser); we still show the URL.
       }
@@ -480,7 +480,7 @@ export default function RepoAuditApp(props: { initialGallery?: GalleryItem[] }) 
           const shareJson = (await shareRes.json()) as { id: string; url: string };
           setShareUrl(shareJson.url);
           try {
-            await navigator.clipboard.writeText(shareJson.url);
+            await navigator.clipboard.writeText(new URL(shareJson.url, window.location.origin).toString());
           } catch {
             // ignore
           }

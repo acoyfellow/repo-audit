@@ -112,7 +112,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const stored = { ...result, sharedAt };
   await kvPutJson(resultsKv, key, stored, { expirationTtl: 60 * 60 * 24 * 30 }); // 30 days
 
-  const shareUrl = `${new URL(request.url).origin}/r/${id}`;
+  const shareUrl = `/r/${id}`;
 
   // Best-effort gallery index.
   try {
