@@ -66,6 +66,7 @@ export type GitHubRepoData = {
   workflows: any[];
   contributors: any[];
   commits: any[];
+  tsconfigContent?: string;
 };
 
 async function fetchTreeAllPaths(owner: string, repo: string, defaultBranch: string, opts: GitHubFetchOpts): Promise<string[] | null> {
@@ -111,12 +112,16 @@ export async function fetchGitHubData(owner: string, repo: string, opts: GitHubF
     ghFetchJson<any>(`${base}/actions/workflows`, opts),
     ghFetchJson<any>(`${base}/contributors?per_page=30`, opts),
     ghFetchJson<any>(`${base}/commits?per_page=30`, opts),
+    ghFetchJson<any>(`${base}/contents/tsconfig.json`, opts),
   ]);
 
   const v = <T,>(i: number): T | null => (settled[i].status === 'fulfilled' ? (settled[i].value as T) : null);
 
   const readmeObj = v<any>(1);
   const readme = readmeObj?.content ? base64ToUtf8(readmeObj.content) : '';
+
+  const tsconfigObj = v<any>(7);
+  const tsconfigContent = tsconfigObj?.content ? base64ToUtf8(tsconfigObj.content) : undefined;
 
   const rootFiles = (v<any[]>(2) || []).map((f) => String(f?.name || '').toLowerCase());
 
@@ -132,5 +137,6 @@ export async function fetchGitHubData(owner: string, repo: string, opts: GitHubF
     workflows: v<any>(4)?.workflows || [],
     contributors: v<any[]>(5) || [],
     commits: v<any[]>(6) || [],
+    tsconfigContent,
   };
 }

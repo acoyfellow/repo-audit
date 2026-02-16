@@ -1,4 +1,5 @@
 import type { CategoryKey } from './categories';
+import type { FileTreeSummary } from './fileTree';
 
 export type RepoMeta = {
   full_name: string;
@@ -23,5 +24,6 @@ export type AuditResult = {
   recommendations: string[];
   redFlags: string[];
   modelUsed: string | null;
+  fileTree?: FileTreeSummary | null;
 };
 

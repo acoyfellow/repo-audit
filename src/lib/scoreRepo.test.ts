@@ -96,6 +96,40 @@ describe('scoreRepo', () => {
     vi.useRealTimers();
   });
 
+  it('awards points for tsconfig strict mode', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-02-14T00:00:00Z'));
+
+    const strict = scoreRepo(
+      mkData({ tsconfigContent: JSON.stringify({ compilerOptions: { strict: true } }) }),
+    );
+    expect(strict.details.codeQuality).toContain('strict mode enabled');
+
+    const partial = scoreRepo(
+      mkData({
+        tsconfigContent: JSON.stringify({
+          compilerOptions: { noImplicitAny: true, strictNullChecks: true, strictFunctionTypes: true },
+        }),
+      }),
+    );
+    expect(partial.details.codeQuality.join(' ')).toMatch(/3\/4 strict flags/);
+
+    const weak = scoreRepo(
+      mkData({
+        tsconfigContent: JSON.stringify({
+          compilerOptions: { noImplicitAny: false },
+        }),
+      }),
+    );
+    expect(weak.details.codeQuality).toContain('No strict flags in tsconfig');
+    expect(weak.details.codeQuality).toContain('noImplicitAny disabled \u2014 weak typing');
+
+    const none = scoreRepo(mkData({ tsconfigContent: undefined }));
+    expect(none.details.codeQuality).not.toContain('strict mode enabled');
+
+    vi.useRealTimers();
+  });
+
   it('recognizes Diataxis doc structure', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-02-14T00:00:00Z'));

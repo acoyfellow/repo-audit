@@ -4,6 +4,7 @@ import { scoreRepo } from '../../lib/scoreRepo';
 import { aiEnhance } from '../../lib/aiEnhance';
 import { CATEGORIES } from '../../lib/categories';
 import type { AuditResult, RepoMeta } from '../../lib/auditTypes';
+import { buildFileTree } from '../../lib/fileTree';
 import { rateLimitFixedWindow } from '../../lib/rateLimit';
 import { kvGetJson, kvPutJson } from '../../lib/kvJson';
 
@@ -97,6 +98,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     const data = await fetchGitHubData(owner, name, { token: ghToken });
     const det = scoreRepo(data);
+    const fileTree = buildFileTree(data.allPaths);
 
     const enhancement = !aiEnabled ? null : await aiEnhance(env ?? {}, data, det.scores, model);
 
@@ -138,6 +140,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       recommendations: enhancement?.recommendations || [],
       redFlags: enhancement?.redFlags || [],
       modelUsed: enhancement ? model : null,
+      fileTree,
     };
 
     if (resultsKv) {

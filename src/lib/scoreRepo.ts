@@ -7,7 +7,7 @@ export type ScoreResult = {
 };
 
 export function scoreRepo(data: GitHubRepoData): ScoreResult {
-  const { meta, community, readme = '', rootFiles, allPaths, releases, workflows, contributors, commits } = data;
+  const { meta, community, readme = '', rootFiles, allPaths, releases, workflows, contributors, commits, tsconfigContent } = data;
 
   const scores = {} as Record<CategoryKey, number>;
   const details = {} as Record<CategoryKey, string[]>;
@@ -180,6 +180,36 @@ export function scoreRepo(data: GitHubRepoData): ScoreResult {
     d.push('TypeScript');
   } else {
     d.push('No TypeScript');
+  }
+  // Parse tsconfig.json and check strict settings
+  if (tsconfigContent) {
+    try {
+      const tsconfig = JSON.parse(tsconfigContent);
+      const co = tsconfig.compilerOptions || {};
+      if (co.strict === true) {
+        s += 1.5;
+        d.push('strict mode enabled');
+      } else {
+        // Check individual strict flags
+        const strictFlags = ['noImplicitAny', 'strictNullChecks', 'strictFunctionTypes', 'noImplicitReturns'];
+        const enabled = strictFlags.filter(f => co[f] === true);
+        if (enabled.length >= 3) {
+          s += 1;
+          d.push(`${enabled.length}/4 strict flags`);
+        } else if (enabled.length >= 1) {
+          s += 0.5;
+          d.push(`Only ${enabled.length}/4 strict flags`);
+        } else {
+          d.push('No strict flags in tsconfig');
+        }
+      }
+      // Check for noImplicitAny specifically when not using strict
+      if (co.strict !== true && co.noImplicitAny === false) {
+        d.push('noImplicitAny disabled — weak typing');
+      }
+    } catch {
+      // Invalid JSON, skip
+    }
   }
   if (has(['.eslintrc', 'eslint.config', 'biome.json', '.prettierrc', 'prettier.config', 'deno.json'])) {
     s += 1.5;

@@ -4,6 +4,17 @@ import { CATEGORIES, computeTotal } from '../lib/categories';
 import { getGrade } from '../lib/grades';
 import type { AuditResult } from '../lib/auditTypes';
 
+const GROUP_CONFIG = [
+  { key: 'source' as const, label: 'Source', icon: '◆', color: '#60a5fa' },
+  { key: 'tests' as const, label: 'Tests', icon: '◎', color: '#34d399' },
+  { key: 'docs' as const, label: 'Docs', icon: '▣', color: '#a78bfa' },
+  { key: 'config' as const, label: 'Config', icon: '⚙', color: '#fbbf24' },
+  { key: 'ci' as const, label: 'CI', icon: '◉', color: '#f472b6' },
+  { key: 'assets' as const, label: 'Assets', icon: '◇', color: '#fb923c' },
+  { key: 'build' as const, label: 'Build', icon: '▨', color: '#94a3b8' },
+  { key: 'other' as const, label: 'Other', icon: '·', color: '#64748b' },
+];
+
 function isNeg(t: string) {
   return /^(no |missing|stale|few |flat |low |minimal |none|archived|thin|weak|brief |lacks|limited|absent)/i.test((t || '').trim());
 }
@@ -91,6 +102,7 @@ export default function ResultsView(props: {
   const total = useMemo(() => computeTotal(result.scores), [result]);
   const grade = getGrade(total);
   const flags = result.redFlags || [];
+  const [treeOpen, setTreeOpen] = useState(false);
 
   return (
     <div className="animate-fu">
@@ -199,6 +211,51 @@ export default function ResultsView(props: {
           );
         })}
       </div>
+
+      {result.fileTree ? (
+        <div className="mt-4 rounded-2xl border border-border bg-surface p-5">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between text-left"
+            onClick={() => setTreeOpen(!treeOpen)}
+          >
+            <div className="font-mono text-[10px] uppercase tracking-[.14em] text-dim">
+              Repository Structure
+              <span className="ml-2 text-muted">{result.fileTree.totalFiles} files</span>
+            </div>
+            <span className="font-mono text-xs text-dim">{treeOpen ? '▾' : '▸'}</span>
+          </button>
+          {treeOpen ? (
+            <div className="mt-3">
+              <div className="flex flex-wrap gap-2">
+                {GROUP_CONFIG.filter(g => (result.fileTree?.groups[g.key] ?? 0) > 0).map(g => (
+                  <span key={g.key} className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px]" style={{ color: g.color }}>
+                    {g.icon} {g.label} ({result.fileTree!.groups[g.key]})
+                  </span>
+                ))}
+              </div>
+              <div className="mt-3 rounded-lg border border-border bg-bg p-3 font-mono text-xs">
+                {result.fileTree.topDirs.map((entry, i) => (
+                  <div key={entry.path} className="flex gap-2 py-0.5" style={{ opacity: i < 20 ? 1 : 0.5 }}>
+                    <span style={{ color: GROUP_CONFIG.find(g => g.key === entry.group)?.color ?? 'rgb(var(--c-dim))' }}>
+                      {entry.path.endsWith('/') ? '📁' : '📄'}
+                    </span>
+                    <span className="text-text">{entry.path}</span>
+                    {entry.label ? <span className="text-dim">— {entry.label}</span> : null}
+                  </div>
+                ))}
+              </div>
+              {result.fileTree.highlights.length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                  {result.fileTree.highlights.map((h, i) => (
+                    <span key={i} className="font-mono text-[11px] text-muted">• {h}</span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {result.recommendations?.length ? (
         <div className="mt-4 rounded-2xl border border-accent/15 bg-surface p-5">
