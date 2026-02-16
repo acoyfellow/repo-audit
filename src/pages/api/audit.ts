@@ -20,6 +20,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const model = url.searchParams.get('model')?.trim() || '@cf/zai-org/glm-4.7-flash';
     const ai = url.searchParams.get('ai');
     const aiEnabled = ai !== '0';
+    const fresh = url.searchParams.get('fresh') === '1';
 
     const m = repo.replace(/\/$/, '').match(/^([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/);
     if (!m) {
@@ -81,7 +82,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     // Deterministic scoring is fairly stable; keep it longer to reduce GitHub load.
     const cacheTtlSeconds = aiEnabled ? 600 : 3600;
 
-    if (resultsKv) {
+    if (resultsKv && !fresh) {
       const cached = await kvGetJson<AuditResult>(resultsKv, cacheKey);
       if (cached) {
         return new Response(JSON.stringify(cached), {
