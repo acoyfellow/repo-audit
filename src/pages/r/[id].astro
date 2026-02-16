@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ResultsView from '../../components/ResultsView';
+import RescanButton from '../../components/RescanButton';
 import { kvGetJson } from '../../lib/kvJson';
 import { computeTotal } from '../../lib/categories';
 import { getGrade } from '../../lib/grades';
@@ -89,13 +90,14 @@ const jsonLd = found ? {
             </div>
           ) : null}
           <ResultsView result={stored as AuditResult} />
-          <div class="mt-8 flex justify-center pb-6">
+          <div class="mt-8 flex flex-wrap items-start justify-center gap-3 pb-6">
             <a
               href="/"
               class="rounded-xl border border-border bg-surface px-5 py-3 font-mono text-xs text-muted transition hover:border-accent/40 hover:text-text"
             >
               Audit Another Repo
             </a>
+            <RescanButton client:idle repo={repoName} />
           </div>
         </>
       ) : (
