@@ -301,7 +301,7 @@ export function scoreRepo(data: GitHubRepoData): ScoreResult {
   // 7. Security
   s = 0;
   d = [];
-  const cpf = (community && community.files) || {};
+  const cpf = (community?.files) || {};
   if (cpf.security) {
     s += 2.5;
     d.push('SECURITY.md');

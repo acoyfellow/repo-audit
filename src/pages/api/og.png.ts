@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { Resvg } from '@cf-wasm/resvg';
 
-let fontCache: { mono: Uint8Array | null; monoRegular: Uint8Array | null; sans: Uint8Array | null } = {
+const fontCache: { mono: Uint8Array | null; monoRegular: Uint8Array | null; sans: Uint8Array | null } = {
   mono: null, monoRegular: null, sans: null
 };
 
@@ -55,7 +55,7 @@ function wrapText(text: string, maxChars: number): string[] {
       lines.push(current);
       current = word;
     } else {
-      current = current ? current + ' ' + word : word;
+      current = current ? `${current} ${word}` : word;
     }
   }
   if (current) lines.push(current);
@@ -80,7 +80,7 @@ function buildSvg(params: {
   grade?: GradeInfo;
   description?: string;
 }): string {
-  const { title, repo, score, grade, description } = params;
+  const { repo, score, grade, description } = params;
   const W = 1200;
   const H = 630;
 

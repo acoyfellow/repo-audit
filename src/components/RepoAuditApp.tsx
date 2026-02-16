@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { computeTotal } from '../lib/categories';
 import { getGrade } from '../lib/grades';
 import type { AuditResult } from '../lib/auditTypes';
@@ -18,7 +18,7 @@ function AnimNum({ value, dur = 1400 }: { value: number; dur?: number }) {
       if (!mounted.current) return;
       if (!t0.current) t0.current = ts;
       const p = Math.min((ts - t0.current) / dur, 1);
-      setN(value * (1 - Math.pow(1 - p, 3)));
+      setN(value * (1 - (1 - p) ** 3));
       if (p < 1) raf.current = requestAnimationFrame(step);
     };
 
@@ -86,6 +86,7 @@ function GallerySection({ gallery }: { gallery: GalleryItem[] }) {
       </div>
       {hasMore ? (
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           className="mt-3 w-full rounded-lg border border-border bg-bg py-2 font-mono text-xs text-muted transition hover:border-accent/35 hover:text-text"
         >
@@ -145,7 +146,7 @@ function InputCard(props: {
     return () => {
       dead = true;
     };
-  }, []);
+  }, [gallery.length]);
 
   const effectiveModel = (customModel || model).trim();
 
@@ -186,6 +187,7 @@ function InputCard(props: {
           disabled={loading}
         />
         <button
+          type="submit"
           onClick={go}
           className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-accent px-4 py-2 font-mono text-xs font-semibold tracking-wide text-bg transition hover:brightness-95 active:brightness-90 disabled:opacity-50"
           disabled={loading}
@@ -556,7 +558,7 @@ export default function RepoAuditApp(props: { initialGallery?: GalleryItem[] }) 
           <div className="flex justify-center">
             <button
               type="button"
-              onClick={() => (setScreen('input'), setResult(null), setError(''))}
+              onClick={() => { setScreen('input'); setResult(null); setError(''); }}
               className="rounded-xl border border-border bg-surface px-5 py-3 font-mono text-xs text-muted transition hover:border-accent/40 hover:text-text"
             >
               Audit Another

@@ -17,7 +17,7 @@ type GalleryItem = {
  * POST /api/gallery — one-time cleanup: deduplicate gallery entries by full_name,
  * keeping only the most recent entry per repo.
  */
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ locals }) => {
   const env = (locals as any)?.runtime?.env as { RESULTS?: KVNamespace } | undefined;
   const resultsKv = env?.RESULTS;
 

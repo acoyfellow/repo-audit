@@ -129,7 +129,7 @@ export async function fetchGitHubData(owner: string, repo: string, opts: GitHubF
     rootFiles,
     allPaths,
     releases: v<any[]>(3) || [],
-    workflows: (v<any>(4) || {}).workflows || [],
+    workflows: v<any>(4)?.workflows || [],
     contributors: v<any[]>(5) || [],
     commits: v<any[]>(6) || [],
   };

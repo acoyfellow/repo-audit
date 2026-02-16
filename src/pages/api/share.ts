@@ -134,7 +134,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const maxAgeMs = 30 * 24 * 60 * 60 * 1000;
     const normalizedName = fullName.trim().toLowerCase();
     const pruned = existing
-      .filter((x) => x && x.id && x.id !== id)
+      .filter((x) => x?.id && x.id !== id)
       // Deduplicate by repo name so re-audits don't stack up
       .filter((x) => x.full_name.trim().toLowerCase() !== normalizedName)
       .filter((x) => {

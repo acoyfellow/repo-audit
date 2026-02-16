@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type React from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CATEGORIES, computeTotal } from '../lib/categories';
 import { getGrade } from '../lib/grades';
 import type { AuditResult } from '../lib/auditTypes';
@@ -25,7 +26,7 @@ function AnimNum({ value, dur = 1400 }: { value: number; dur?: number }) {
       if (!mounted.current) return;
       if (!t0.current) t0.current = ts;
       const p = Math.min((ts - t0.current) / dur, 1);
-      setN(value * (1 - Math.pow(1 - p, 3)));
+      setN(value * (1 - (1 - p) ** 3));
       if (p < 1) raf.current = requestAnimationFrame(step);
     };
 
@@ -41,7 +42,7 @@ function AnimNum({ value, dur = 1400 }: { value: number; dur?: number }) {
 
 function Ring({ score, size = 64, sw = 2.5, delay = 0 }: { score: number; size?: number; sw?: number; delay?: number }) {
   // Render "on" for SSR so share pages look correct without hydration.
-  const [on, setOn] = useState(() => (typeof window === 'undefined' ? true : false));
+  const [on, setOn] = useState(() => (typeof window  === 'undefined'));
   const g = getGrade(score);
   const r = (size - sw * 2) / 2;
   const c = 2 * Math.PI * r;
@@ -142,6 +143,7 @@ export default function ResultsView(props: {
             <div className="font-mono text-[10px] tracking-[.1em] text-bad">RED FLAGS</div>
             <div className="mt-2 grid gap-1">
               {flags.map((f, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: static string list
                 <div key={i} className="font-body text-sm text-bad/90">
                   {f}
                 </div>
@@ -183,6 +185,7 @@ export default function ResultsView(props: {
                 {dd.map((t, i) => {
                   const neg = isNeg(t);
                   return (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static detail strings
                     <span key={i} className="font-mono text-[11px] text-dim">
                       <span className="mr-1" style={{ color: neg ? 'rgb(var(--c-bad) / .7)' : 'rgb(var(--c-accent) / .7)' }}>
                         {neg ? '−' : '+'}
@@ -202,6 +205,7 @@ export default function ResultsView(props: {
           <div className="font-mono text-[10px] tracking-[.1em] text-accent">RECOMMENDATIONS</div>
           <div className="mt-3 grid gap-2">
             {result.recommendations.map((r, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: static recommendation list
               <div key={i} className="flex gap-3 border-t border-border pt-2 first:border-t-0 first:pt-0">
                 <span className="mt-0.5 shrink-0 font-mono text-[11px] text-accent">{String(i + 1).padStart(2, '0')}</span>
                 <span className="font-body text-sm leading-relaxed text-muted">{r}</span>
