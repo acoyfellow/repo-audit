@@ -315,6 +315,13 @@ repo-audit/
 └── vitest.config.ts      # Test configuration
 ```
 
+## Try It Online
+
+Explore Repo Audit without installing anything:
+
+- **Live app**: [repo-audit.coey.dev](https://repo-audit.coey.dev)
+- **StackBlitz**: Fork and run locally in your browser via [StackBlitz](https://stackblitz.com/github/acoyfellow/repo-audit)
+
 ## Contributing
 
 Contributions are welcome! Here's how to get started:
