@@ -20,7 +20,7 @@
     "@astrojs/react": "^4.4.2",
     "@astrojs/tailwind": "^6.0.2",
     "@cf-wasm/resvg": "^0.3.3",
-    "@cloudflare/workers-types": "^4.20260214.0",
+    "@cloudflare/workers-types": "^4.20260228.0",
     "@fontsource/cormorant-garamond": "^5.2.11",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-sans": "^5.2.8",
