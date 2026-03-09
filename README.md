@@ -339,4 +339,4 @@ Please keep PRs focused on a single concern. For larger changes, open an issue f
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
-Built by [Jordan Coy](https://github.com/acoyfellow).
+Built by [Jordan Coeyman](https://github.com/acoyfellow).
